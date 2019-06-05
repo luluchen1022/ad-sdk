@@ -1,4 +1,5 @@
 const express = require('express')
+const cors = require('cors')
 const app = express()
 const data = require('./mock-data.json');
 const { PORT = 3000 } = process.env;
@@ -18,6 +19,8 @@ const getAd = (type = '') => {
     id: genAdId()
   }
 }
+
+app.use(cors())
 
 //api endpoint
 app.get('/ads', (req, res) => {
