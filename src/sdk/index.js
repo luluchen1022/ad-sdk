@@ -1,3 +1,4 @@
+import './index.scss'
 export default class SDK {
 
   constructor({ type = AD_TYPE.BANNER, element } = {}) {
@@ -34,28 +35,47 @@ export default class SDK {
   _loadBanner({ element, data }) {
     const container = document.createElement('div')
     const img = document.createElement('img')
+    const content = document.createElement('div')
+    const title = document.createElement('p')
+    container.classList.add('banner-container')
+    img.classList.add('img-container')
+    content.classList.add('content-container')
+    title.classList.add('content-title')
+    title.innerText = data.title
     img.src = data.image
+    content.appendChild(title)
     container.appendChild(img)
+    container.appendChild(content)
     element.appendChild(container)
-
-    this._checkImpression({element, data})
-
-    document.addEventListener('scroll', () => this._checkImpression())
-  }
-
-  _checkImpression({element, data}) {
-    if (this._isImpressed()) {
-      fetch(data.impression_url)
-      this._triggerEvent(EVENT.AD_IMPRESSION)
-    }
-  }
-
-  _isImpressed(element) {
-    //is element be seen half????
+    container.addEventListener('click', () => location.href = `${data.url}`)
+    this._checkImpression({ element, data })
+    document.addEventListener('scroll', () => this._checkImpression({ element, data }))
   }
 
   _loadVideo({ element, data }) {
+    const video = document.createElement('iframe')
+    video.frameBorder = "0"
+    video.allowFullscreen = "true"
+    video.src = data.video_url
+    element.appendChild(video)
+    this._checkImpression({ element, data })
+    document.addEventListener('scroll', () => this._checkImpression({ element, data }))
+  }
 
+  _checkImpression({ element, data }) {
+    const bounding = element.getBoundingClientRect()
+    if (bounding.bottom - window.innerHeight <= bounding.height / 2) 
+    {
+      console.log("123")
+      document.removeEventListener('scroll', () => {
+        console.log('456')
+        this._checkImpression({ element, data })
+        fetch(data.impression_url)
+        this._triggerEvent(EVENT.AD_IMPRESSION)
+      })
+    } else {
+      return
+    }
   }
 
   on(event, callback) {

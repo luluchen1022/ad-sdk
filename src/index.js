@@ -1,14 +1,30 @@
 
 import SDK, { EVENT, AD_TYPE } from './sdk'
 
-const slot = {
+const slotBanner = {
   type: AD_TYPE.BANNER,
   element: document.querySelector('.banner-slot')
 }
 
-const sdk = new SDK(slot)
+const sdkBanner = new SDK(slotBanner)
 
-sdk.requestAd()
+sdkBanner.requestAd()
 
-sdk.on(EVENT.AD_LOADED, () => { console.log('loaded!') })
-sdk.on(EVENT.AD_FAILED, () => { console.log('fail!') })
+sdkBanner.on(EVENT.AD_LOADED, () => { console.log('loaded!') })
+sdkBanner.on(EVENT.AD_FAILED, () => { console.log('fail!') })
+
+
+const slotVideo = {
+  type: AD_TYPE.VIDEO,
+  element: document.querySelector('.video-slot')
+}
+
+const sdkVideo = new SDK(slotVideo)
+
+sdkVideo.requestAd()
+
+sdkVideo.on(EVENT.AD_LOADED, () => { console.log('loaded!') })
+sdkVideo.on(EVENT.AD_FAILED, () => { 
+  console.log('fail!')
+  slotVideo.element.style.display="none"
+ })
