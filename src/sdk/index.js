@@ -6,8 +6,8 @@ export default class SDK {
     this.type = type
     this.element = element
   }
-  
-  async requestAd() { 
+
+  async requestAd() {
     const { element, type } = this
     if (!element) {
       throw new Error('There is no slot!')
@@ -18,7 +18,6 @@ export default class SDK {
 
     if (data.success) {
       this._loadAd({ element, data })
-      this._triggerEvent(EVENT.AD_LOADED)
     } else {
       this._triggerEvent(EVENT.AD_FAILED)
     }
@@ -41,37 +40,52 @@ export default class SDK {
     img.classList.add('img-container')
     content.classList.add('content-container')
     title.classList.add('content-title')
-    title.innerText = data.title
+    title.textContent = data.title
     img.src = data.image
-    content.appendChild(title)
-    container.appendChild(img)
-    container.appendChild(content)
-    element.appendChild(container)
-    container.addEventListener('click', () => location.href = `${data.url}`)
-    this._checkImpression({ element, data })
-    this._scollHandler = () => this._checkImpression({ element, data })
-    document.addEventListener('scroll', this._scollHandler)
+    img.onload = () => {
+      content.appendChild(title)
+      container.appendChild(img)
+      container.appendChild(content)
+      element.appendChild(container)
+      container.addEventListener('click', () => location.href = `${data.url}`)
+      this._checkImpression({ element, data })
+      this._scollHandler = () => this._checkImpression({ element, data })
+      document.addEventListener('scroll', this._scollHandler)      
+      this._triggerEvent(EVENT.AD_LOADED)
+    }
+    img.onerror = () => this._triggerEvent(EVENT.AD_FAILED)
   }
 
   _loadVideo({ element, data }) {
-    const video = document.createElement('iframe')
-    video.frameBorder = "0"
-    video.allowFullscreen = "true"
-    video.src = data.video_url
-    element.appendChild(video)
-    this._checkImpression({ element, data })
-    this._scollHandler = () => this._checkImpression({ element, data })
-    document.addEventListener('scroll',this._scollHandler)
+    const iframe = document.createElement('iframe')
+    iframe.frameBorder = "0"
+    iframe.allowFullscreen = "true"
+    iframe.src = data.video_url
+    element.appendChild(iframe)
+    iframe.onload = () => {
+      this._checkImpression({ element, data })
+      this._scollHandler = () => this._checkImpression({ element, data })
+      document.addEventListener('scroll', this._scollHandler)      
+      this._triggerEvent(EVENT.AD_LOADED)
+    }
+    iframe.onerror = () => this._triggerEvent(EVENT.AD_FAILED)
   }
 
-  _checkImpression({ element, data }) {
+  _checkImpression({ element, data, firedFromTimeout }) {
+    if (this._impressionStart && !firedFromTimeout) {
+      return
+    }
+
     const bounding = element.getBoundingClientRect()
     if (bounding.bottom - window.innerHeight <= bounding.height / 2) {
-      setTimeout(()=> {
+      if (firedFromTimeout) {
         fetch(data.impression_url)
         this._triggerEvent(EVENT.AD_IMPRESSION)
-      }, 1000)
-      document.removeEventListener('scroll',this._scollHandler)
+        document.removeEventListener('scroll', this._scollHandler)
+      } else {
+        this._impressionStart = true
+        setTimeout(() => { this._checkImpression({ element, data, firedFromTimeout: true }) }, 1000)
+      }
     }
   }
 
