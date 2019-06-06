@@ -7,7 +7,7 @@ export default class SDK {
     this.element = element
   }
   
-  async requestAd() {
+  async requestAd() { 
     const { element, type } = this
     if (!element) {
       throw new Error('There is no slot!')
@@ -67,7 +67,7 @@ export default class SDK {
   _checkImpression({ element, data }) {
     const bounding = element.getBoundingClientRect()
     if (bounding.bottom - window.innerHeight <= bounding.height / 2) {
-      setTimeout(function () {
+      setTimeout(()=> {
         fetch(data.impression_url)
         this._triggerEvent(EVENT.AD_IMPRESSION)
       }, 1000)
