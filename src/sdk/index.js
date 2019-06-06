@@ -6,7 +6,7 @@ export default class SDK {
     this.type = type
     this.element = element
   }
-
+  
   async requestAd() {
     const { element, type } = this
     if (!element) {
@@ -49,7 +49,8 @@ export default class SDK {
     element.appendChild(container)
     container.addEventListener('click', () => location.href = `${data.url}`)
     this._checkImpression({ element, data })
-    document.addEventListener('scroll', () => this._checkImpression({ element, data }))
+    this._scollHandler = () => this._checkImpression({ element, data })
+    document.addEventListener('scroll', this._scollHandler)
   }
 
   _loadVideo({ element, data }) {
@@ -59,22 +60,18 @@ export default class SDK {
     video.src = data.video_url
     element.appendChild(video)
     this._checkImpression({ element, data })
-    document.addEventListener('scroll', () => this._checkImpression({ element, data }))
+    this._scollHandler = () => this._checkImpression({ element, data })
+    document.addEventListener('scroll',this._scollHandler)
   }
 
   _checkImpression({ element, data }) {
     const bounding = element.getBoundingClientRect()
-    if (bounding.bottom - window.innerHeight <= bounding.height / 2) 
-    {
-      console.log("123")
-      document.removeEventListener('scroll', () => {
-        console.log('456')
-        this._checkImpression({ element, data })
+    if (bounding.bottom - window.innerHeight <= bounding.height / 2) {
+      setTimeout(function () {
         fetch(data.impression_url)
         this._triggerEvent(EVENT.AD_IMPRESSION)
-      })
-    } else {
-      return
+      }, 1000)
+      document.removeEventListener('scroll',this._scollHandler)
     }
   }
 
