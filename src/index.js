@@ -1,5 +1,7 @@
 
 import SDK, { EVENT, AD_TYPE } from './sdk'
+import * as Sentry from '@sentry/browser';
+Sentry.init({ dsn: 'https://2c4345bd49354c358eab71d85c23f63c@sentry.io/1485839' });
 
 const slotBanner = {
   type: AD_TYPE.BANNER,
